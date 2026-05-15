@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HIMARK — Animated Email Signature Banner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Source+Sans+3:wght@300;400;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ============================================================
+       HIMARK — Email Signature Banner
+       Matches the live site palette + typography exactly.
+       Tokens mirror /styles/styles.css :root variables.
+       ============================================================ */
+    :root {
+      --midnight: #1C2B3A;
+      --ink-deep: #0E1822;
+      --ocean:    #5F8190;
+      --ocean-lt: #8AADB8;
+      --ocean-dk: #2E4A5A;
+      --mist:     #E2F0F0;
+      --white:    #FFFFFF;
+      --off:      #F7F7F5;
+
+      --f-disp: 'Source Sans 3', 'Nimbus Sans', 'Helvetica Neue', sans-serif;
+      --f-nav:  'Inter', 'Nimbus Sans', 'Helvetica Neue', sans-serif;
+      --f-mono: 'JetBrains Mono', 'Roboto Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: var(--ink-deep);
+      font-family: var(--f-disp);
+      padding: 40px 20px;
+    }
+
+    /* ====== Banner shell ====== */
+    .banner {
+      position: relative;
+      width: 900px;
+      height: 240px;
+      overflow: hidden;
+      background:
+        linear-gradient(135deg, var(--midnight) 0%, var(--ocean-dk) 100%);
+      border: 1px solid rgba(95, 129, 144, 0.18);
+      box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.20),
+        0 24px 60px rgba(0, 0, 0, 0.40);
+      isolation: isolate;
+    }
+
+    /* Slow rotating ambient glow — ocean-tinted to match brand */
+    .banner::before {
+      content: "";
+      position: absolute;
+      width: 200%;
+      height: 200%;
+      top: -50%;
+      left: -50%;
+      background: radial-gradient(
+        circle,
+        rgba(138, 173, 184, 0.10) 0%,
+        transparent 55%
+      );
+      animation: rotateGlow 18s linear infinite;
+      z-index: 0;
+    }
+
+    /* Sharp HIMARK grid pattern — same as the site's hero overlay */
+    .grid-overlay {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(95, 129, 144, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(95, 129, 144, 0.06) 1px, transparent 1px);
+      background-size: 48px 48px;
+      opacity: 0.85;
+      z-index: 0;
+    }
+
+    /* Editorial coordinate labels in corners */
+    .coord {
+      position: absolute;
+      font-family: var(--f-mono);
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      color: rgba(226, 240, 240, 0.45);
+      text-transform: uppercase;
+      z-index: 4;
+    }
+    .coord-tl { top: 14px; left: 24px; }
+    .coord-tr { top: 14px; right: 24px; }
+    .coord-bl { bottom: 18px; left: 24px; }
+
+    /* Slow sweeping beam */
+    .light-beam {
+      position: absolute;
+      top: -20%;
+      left: -30%;
+      width: 35%;
+      height: 180%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(226, 240, 240, 0.10),
+        transparent
+      );
+      transform: rotate(18deg);
+      animation: beamMove 7s ease-in-out infinite;
+      z-index: 1;
+    }
+
+    /* ====== Layout ====== */
+    .content {
+      position: relative;
+      z-index: 5;
+      display: grid;
+      grid-template-columns: auto 1px 1fr;
+      align-items: center;
+      gap: 44px;
+      height: 100%;
+      padding: 0 44px;
+    }
+
+    /* ====== Left — HIMARK brand image ====== */
+    .left {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: fadeUp 1s ease-out 0.1s both;
+    }
+
+    .brand-logo {
+      display: block;
+      width: 320px;
+      max-width: 100%;
+      height: auto;
+      /* subtle lift so the white glyph reads cleanly on midnight */
+      filter:
+        drop-shadow(0 1px 0 rgba(255, 255, 255, 0.06))
+        drop-shadow(0 8px 24px rgba(0, 0, 0, 0.35));
+      -webkit-user-drag: none;
+      user-select: none;
+    }
+
+    /* ====== Vertical divider ====== */
+    .divider {
+      width: 1px;
+      height: 130px;
+      background: linear-gradient(
+        180deg,
+        transparent 0%,
+        rgba(138, 173, 184, 0.45) 30%,
+        rgba(138, 173, 184, 0.45) 70%,
+        transparent 100%
+      );
+    }
+
+    /* ====== Right — service stack ====== */
+    .right {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      animation: fadeSlide 1.1s ease-out 0.25s both;
+    }
+
+    .services-h {
+      font-family: var(--f-mono);
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(226, 240, 240, 0.48);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .services-h::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: rgba(95, 129, 144, 0.30);
+    }
+
+    .service-line {
+      font-family: var(--f-nav);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: rgba(247, 247, 245, 0.88);
+      padding: 5px 0;
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      align-items: baseline;
+    }
+    .service-num {
+      font-family: var(--f-mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      color: var(--ocean-lt);
+    }
+
+    /* ====== Bottom progress bar — slow ocean sweep ====== */
+    .bottom-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 2px;
+      width: 100%;
+      background: rgba(95, 129, 144, 0.18);
+      overflow: hidden;
+      z-index: 4;
+    }
+    .bottom-bar::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        var(--ocean-lt) 50%,
+        transparent
+      );
+      animation: loadingBar 4.5s ease-in-out infinite;
+    }
+
+    /* ====== Animations ====== */
+    @keyframes rotateGlow {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+    @keyframes beamMove {
+      0%   { transform: translateX(-120%) rotate(18deg); }
+      100% { transform: translateX(360%)  rotate(18deg); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateX(20px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes loadingBar {
+      0%   { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    /* ====== Responsive ====== */
+    @media (max-width: 940px) {
+      .banner {
+        width: 100%;
+        max-width: 600px;
+        height: auto;
+        min-height: 280px;
+      }
+      .content {
+        grid-template-columns: 1fr;
+        gap: 24px;
+        padding: 50px 28px 36px;
+        text-align: left;
+      }
+      .divider { display: none; }
+      .brand-logo { width: 260px; }
+      .services-h::after { display: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .banner::before,
+      .light-beam,
+      .bottom-bar::after,
+      .left,
+      .right { animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="banner">
+
+    <!-- Editorial coordinate labels — matches site language -->
+    <span class="coord coord-tl">[ HIMARK · BANNER ]</span>
+    <span class="coord coord-tr">EST · 2024 / RAND.ZA</span>
+    <span class="coord coord-bl">PRINCIPAL · COMMUNIQUÉ</span>
+
+    <!-- Ambient layers -->
+    <div class="grid-overlay"></div>
+    <div class="light-beam"></div>
+
+    <div class="content">
+
+      <!-- LEFT — HIMARK brand image -->
+      <div class="left">
+        <img class="brand-logo" src="email logo.png" alt="HIMARK" />
+      </div>
+
+      <!-- Vertical rule -->
+      <div class="divider"></div>
+
+      <!-- RIGHT — Service stack with mono numbering -->
+      <div class="right">
+        <p class="services-h">Capabilities · 04</p>
+        <div class="service-line"><span class="service-num">[ 01 ]</span><span>Strategic Growth Consulting</span></div>
+        <div class="service-line"><span class="service-num">[ 02 ]</span><span>Digital Infrastructure</span></div>
+        <div class="service-line"><span class="service-num">[ 03 ]</span><span>Automation &amp; Systems</span></div>
+        <div class="service-line"><span class="service-num">[ 04 ]</span><span>Marketing Campaign Engineering</span></div>
+      </div>
+
+    </div>
+
+    <!-- Animated progress bar at the base -->
+    <div class="bottom-bar"></div>
+
+  </div>
+
+</body>
+</html>
